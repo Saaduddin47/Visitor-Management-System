@@ -1,6 +1,7 @@
 import { ClipboardList, ShieldCheck, UserCheck, Users, LogOut } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { RippleButton } from '@/components/ui/multi-type-ripple-buttons';
 
 const navByRole = {
   employee: [{ to: '/employee', label: 'Employee', icon: ClipboardList }],
@@ -39,12 +40,13 @@ const Sidebar = () => {
         })}
       </nav>
       <div className="p-3 mt-auto">
-        <button
+        <RippleButton
           onClick={logout}
-          className="w-full flex items-center justify-center gap-2 btn-secondary"
+          className="w-full flex items-center justify-center gap-2"
+          variant="ghost"
         >
           <LogOut size={16} /> Logout
-        </button>
+        </RippleButton>
       </div>
     </aside>
   );

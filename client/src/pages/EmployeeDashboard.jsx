@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AppLayout from '../components/AppLayout';
 import { employeeApi } from '../api';
+import { RippleButton } from '@/components/ui/multi-type-ripple-buttons';
 
 const initialForm = {
   visitorName: '',
@@ -111,7 +112,7 @@ const EmployeeDashboard = () => {
           ))}
           <input className="input md:col-span-2" type="file" onChange={(e) => setForm((p) => ({ ...p, attachment: e.target.files?.[0] || null }))} />
           <div className="md:col-span-2">
-            <button className="btn-primary" type="submit">Submit Request</button>
+            <RippleButton className="" type="submit" variant="default">Submit Request</RippleButton>
           </div>
         </form>
         {message && <p className="text-sm mt-3 text-slate-600">{message}</p>}
@@ -146,7 +147,15 @@ const EmployeeDashboard = () => {
             )}
 
             {request.status === 'needs-changes' && editingId !== request._id && (
-              <button className="btn-secondary" onClick={() => startEdit(request)}>Edit &amp; Resubmit</button>
+              <RippleButton
+                className=""
+                onClick={() => startEdit(request)}
+                variant="hoverborder"
+                hoverBorderEffectColor="#2E75B6"
+                hoverBorderEffectThickness="2px"
+              >
+                Edit &amp; Resubmit
+              </RippleButton>
             )}
 
             {editingId === request._id && (
@@ -164,8 +173,8 @@ const EmployeeDashboard = () => {
                 ))}
                 <input className="input md:col-span-2" type="file" onChange={(e) => setEditForm((p) => ({ ...p, attachment: e.target.files?.[0] || null }))} />
                 <div className="md:col-span-2 flex gap-2">
-                  <button className="btn-primary" onClick={() => resubmit(request._id)}>Resubmit</button>
-                  <button className="btn-secondary" onClick={() => setEditingId('')}>Cancel</button>
+                  <RippleButton className="" onClick={() => resubmit(request._id)} variant="default">Resubmit</RippleButton>
+                  <RippleButton className="" onClick={() => setEditingId('')} variant="hover" hoverRippleColor="#6996e2">Cancel</RippleButton>
                 </div>
               </div>
             )}

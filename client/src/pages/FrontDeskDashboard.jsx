@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import AppLayout from '../components/AppLayout';
 import { frontDeskApi } from '../api';
+import { RippleButton } from '@/components/ui/multi-type-ripple-buttons';
 
 const statusBadgeStyles = {
   approved: 'bg-green-100 text-green-700',
@@ -60,6 +61,8 @@ const FrontDeskDashboard = () => {
   const mark = async (type) => {
     if (!selected) return;
     if (type === 'in') await frontDeskApi.checkIn(selected._id, { remark });
+    if (type === 'out') await frontDeskApi.checkOut(selected._id, { remark });
+    if (type === 'no-show') await frontDeskApi.noShow(selected._id, { remark });
     setRemark('');
     await load();
   };
@@ -79,7 +82,7 @@ const FrontDeskDashboard = () => {
             <p className="text-sm text-slate-500">Manual fallback</p>
             <div className="flex gap-2">
               <input className="input" placeholder="Reference ID" value={manualRef} onChange={(e) => setManualRef(e.target.value)} />
-              <button className="btn-secondary" onClick={manualLookup}>Find</button>
+              <RippleButton className="" onClick={manualLookup} variant="default">Find</RippleButton>
             </div>
           </div>
         </section>
@@ -94,7 +97,9 @@ const FrontDeskDashboard = () => {
                 <>
                   <input className="input" placeholder="Remarks (optional)" value={remark} onChange={(e) => setRemark(e.target.value)} />
                   <div className="flex flex-wrap gap-2">
-                    <button className="btn-primary" onClick={() => mark('in')}>Checked-In</button>
+                    <RippleButton className="" onClick={() => mark('in')} variant="default">Checked-In</RippleButton>
+                    <RippleButton className="" onClick={() => mark('out')} variant="hover" hoverRippleColor="#6996e2">Checked-Out</RippleButton>
+                    <RippleButton className="bg-red-600 hover:bg-red-700" onClick={() => mark('no-show')} variant="default">No-Show</RippleButton>
                   </div>
                 </>
               ) : (
@@ -134,7 +139,7 @@ const FrontDeskDashboard = () => {
                 </td>
                 <td className="py-2">
                   {visitor.status === 'approved' ? (
-                    <button className="btn-secondary" onClick={() => checkInFromRow(visitor._id)}>Check-In</button>
+                    <RippleButton className="" onClick={() => checkInFromRow(visitor._id)} variant="default">Check-In</RippleButton>
                   ) : (
                     <span className="text-xs text-slate-400">—</span>
                   )}

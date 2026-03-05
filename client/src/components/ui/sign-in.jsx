@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
+import { RippleButton } from '@/components/ui/multi-type-ripple-buttons';
 
 const AnimatedSignIn = ({
   email,
@@ -37,19 +38,20 @@ const AnimatedSignIn = ({
             theme === 'dark' ? 'bg-slate-900 shadow-xl shadow-slate-900/40' : 'bg-white shadow-xl shadow-gray-200'
           } ${formVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
         >
-          <button
+          <RippleButton
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
             className={`absolute right-4 top-4 z-10 rounded-full p-2 transition-colors ${
               theme === 'dark' ? 'bg-slate-700 text-yellow-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
             aria-label="Toggle theme"
+            variant="ghost"
           >
             {theme === 'dark' ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
             ) : (
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
             )}
-          </button>
+          </RippleButton>
 
           <div className="flex flex-col md:flex-row">
             <div className="hidden w-full md:block md:w-3/5 bg-gray-100 p-6">
@@ -144,30 +146,32 @@ const AnimatedSignIn = ({
                       placeholder="••••••••"
                       required
                     />
-                    <button
+                    <RippleButton
                       type="button"
                       className={`absolute inset-y-0 right-0 flex items-center pr-3 ${
                         theme === 'dark' ? 'text-gray-300' : 'text-gray-500'
                       }`}
                       onClick={() => setShowPassword((prev) => !prev)}
                       aria-label="Toggle password visibility"
+                      variant="ghost"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
+                    </RippleButton>
                   </div>
                 </div>
 
-                <button
+                <RippleButton
                   type="submit"
                   disabled={isLoading}
                   className={`flex w-full items-center justify-center gap-2 rounded-md py-3 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-300 ${
                     theme === 'dark' ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'
                   } ${isLoading ? 'cursor-not-allowed opacity-70' : ''}`}
+                  variant="default"
                 >
                   {isLoading ? 'Signing in...' : <><LogIn size={16} /> Login</>}
-                </button>
+                </RippleButton>
 
-                <button
+                <RippleButton
                   type="button"
                   onClick={onSso}
                   disabled={isSsoLoading || !email}
@@ -176,10 +180,13 @@ const AnimatedSignIn = ({
                       ? 'border border-slate-700 bg-slate-800 text-white hover:bg-slate-700'
                       : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                   } ${(isSsoLoading || !email) ? 'cursor-not-allowed opacity-70' : ''}`}
+                  variant="hoverborder"
+                  hoverBorderEffectColor="#2E75B6"
+                  hoverBorderEffectThickness="2px"
                 >
                   <ShieldCheck size={16} />
                   {isSsoLoading ? 'Signing in with SSO...' : 'Employee SSO'}
-                </button>
+                </RippleButton>
 
                 {message && (
                   <p className={`text-sm ${theme === 'dark' ? 'text-rose-300' : 'text-rose-600'}`}>{message}</p>
