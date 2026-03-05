@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { Building2, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, LogOut, ScanLine } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import AppLayout from '../components/AppLayout';
 import { frontDeskApi } from '../api';
 import { RippleButton } from '@/components/ui/multi-type-ripple-buttons';
+import { useAuth } from '../context/AuthContext';
 
 const statusBadgeStyles = {
   approved: 'bg-green-100 text-green-700',
@@ -15,10 +16,13 @@ const statusBadgeStyles = {
 };
 
 const FrontDeskDashboard = () => {
+  const { logout } = useAuth();
   const [visitors, setVisitors] = useState([]);
   const [manualRef, setManualRef] = useState('');
   const [selected, setSelected] = useState(null);
   const [remark, setRemark] = useState('');
+  const [collapsed, setCollapsed] = useState(false);
+  const [activeNav, setActiveNav] = useState('dashboard');
   const scannerMounted = useRef(false);
 
   const load = async () => {
@@ -72,10 +76,85 @@ const FrontDeskDashboard = () => {
     await load();
   };
 
+  const openSection = (sectionId, navKey) => {
+    setActiveNav(navKey);
+    const node = document.getElementById(sectionId);
+    if (node) node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <AppLayout title="Front-Desk Dashboard">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <section className="card p-5 space-y-4">
+    <div className="flex h-screen">
+      <aside className={`fixed left-0 top-0 h-screen bg-[#1F4E79] text-white flex flex-col transition-all duration-300 ease-in-out ${collapsed ? 'w-16' : 'w-64'}`}>
+        <div className="px-6 py-6 border-b border-white/10">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Building2 className="text-white" size={22} />
+              {!collapsed && (
+                <div>
+                  <h1 className="text-white font-bold text-lg leading-none">VMS</h1>
+                  <p className="text-white/50 text-xs mt-0.5">Front Desk Panel</p>
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setCollapsed((prev) => !prev)}
+              className="text-white/80 hover:text-white rounded-md p-1 hover:bg-white/10 transition-all"
+            >
+              {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 px-3 py-4 space-y-1">
+          <button
+            type="button"
+            onClick={() => openSection('frontdesk-dashboard', 'dashboard')}
+            className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} w-full px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${
+              activeNav === 'dashboard' ? 'bg-white/15 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <LayoutDashboard size={16} />
+            {!collapsed && <span>Dashboard</span>}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openSection('frontdesk-scanner', 'scanner')}
+            className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} w-full px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${
+              activeNav === 'scanner' ? 'bg-white/15 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <ScanLine size={16} />
+            {!collapsed && <span>QR Scanner</span>}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openSection('frontdesk-visitors', 'visitors')}
+            className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} w-full px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${
+              activeNav === 'visitors' ? 'bg-white/15 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <ClipboardList size={16} />
+            {!collapsed && <span>Today's Visitors</span>}
+          </button>
+        </div>
+
+        <div className="px-3 py-4 border-t border-white/10">
+          <button
+            onClick={logout}
+            className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} w-full px-3 py-2.5 rounded-lg text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-all text-sm font-medium`}
+          >
+            <LogOut size={16} />
+            {!collapsed && <span>Logout</span>}
+          </button>
+        </div>
+      </aside>
+
+      <main className={`min-h-screen bg-gray-50 p-8 w-full overflow-y-auto transition-all duration-300 ease-in-out ${collapsed ? 'ml-16' : 'ml-64'}`} id="frontdesk-dashboard">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" id="frontdesk-scanner">
+          <section className="rounded-2xl shadow-sm border border-gray-100 bg-white p-6 space-y-4">
           <h3 className="font-semibold">QR Scanner</h3>
           <div id="qr-reader" className="rounded-lg overflow-hidden border border-slate-200" />
           <div className="space-y-2">
@@ -87,7 +166,7 @@ const FrontDeskDashboard = () => {
           </div>
         </section>
 
-        <section className="card p-5 space-y-3">
+          <section className="rounded-2xl shadow-sm border border-gray-100 bg-white p-6 space-y-3">
           <h3 className="font-semibold">Action Panel</h3>
           {selected ? (
             <>
@@ -110,46 +189,47 @@ const FrontDeskDashboard = () => {
             <p className="text-sm text-slate-500">Scan QR or enter reference ID.</p>
           )}
         </section>
-      </div>
+        </div>
 
-      <section className="card p-5 overflow-x-auto">
-        <h3 className="font-semibold mb-4">Today’s Visitors</h3>
-        <table className="w-full text-sm">
-          <thead className="text-left text-slate-500">
-            <tr>
-              <th className="pb-2">Reference</th>
-              <th className="pb-2">Visitor</th>
-              <th className="pb-2">Host</th>
-              <th className="pb-2">Time</th>
-              <th className="pb-2">Status</th>
-              <th className="pb-2">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visitors.map((visitor) => (
-              <tr key={visitor._id} className="border-t border-slate-100">
-                <td className="py-2">{visitor.referenceId}</td>
-                <td className="py-2">{visitor.visitorName}</td>
-                <td className="py-2">{visitor.officeLocation}</td>
-                <td className="py-2">{visitor.timeOfVisit}</td>
-                <td className="py-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${statusBadgeStyles[visitor.status] || 'bg-slate-100 text-slate-700'}`}>
-                    {visitor.status}
-                  </span>
-                </td>
-                <td className="py-2">
-                  {visitor.status === 'approved' ? (
-                    <RippleButton className="" onClick={() => checkInFromRow(visitor._id)} variant="default">Check-In</RippleButton>
-                  ) : (
-                    <span className="text-xs text-slate-400">—</span>
-                  )}
-                </td>
+        <section id="frontdesk-visitors" className="rounded-2xl shadow-sm border border-gray-100 bg-white p-6 overflow-x-auto mt-6">
+          <h3 className="font-semibold mb-4">Today’s Visitors</h3>
+          <table className="w-full text-sm">
+            <thead className="text-left text-slate-500">
+              <tr>
+                <th className="pb-2">Reference</th>
+                <th className="pb-2">Visitor</th>
+                <th className="pb-2">Host</th>
+                <th className="pb-2">Time</th>
+                <th className="pb-2">Status</th>
+                <th className="pb-2">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-    </AppLayout>
+            </thead>
+            <tbody>
+              {visitors.map((visitor) => (
+                <tr key={visitor._id} className="border-t border-slate-100">
+                  <td className="py-2">{visitor.referenceId}</td>
+                  <td className="py-2">{visitor.visitorName}</td>
+                  <td className="py-2">{visitor.officeLocation}</td>
+                  <td className="py-2">{visitor.timeOfVisit}</td>
+                  <td className="py-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${statusBadgeStyles[visitor.status] || 'bg-slate-100 text-slate-700'}`}>
+                      {visitor.status}
+                    </span>
+                  </td>
+                  <td className="py-2">
+                    {visitor.status === 'approved' ? (
+                      <RippleButton className="" onClick={() => checkInFromRow(visitor._id)} variant="default">Check-In</RippleButton>
+                    ) : (
+                      <span className="text-xs text-slate-400">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
   );
 };
 
