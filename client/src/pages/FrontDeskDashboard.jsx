@@ -1,22 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
-import { Building2, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, LogOut, ScanLine } from 'lucide-react';
+import { Building2, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, LogOut, Moon, ScanLine, Sun } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { frontDeskApi } from '../api';
 import { RippleButton } from '@/components/ui/multi-type-ripple-buttons';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const statusBadgeStyles = {
-  approved: 'bg-green-100 text-green-700',
-  pending: 'bg-yellow-100 text-yellow-700',
-  'needs-changes': 'bg-orange-100 text-orange-700',
-  rejected: 'bg-red-100 text-red-700',
-  'checked-in': 'bg-blue-100 text-blue-700',
-  'checked-out': 'bg-slate-200 text-slate-700',
-  'no-show': 'bg-red-900/15 text-red-900'
+  approved: 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-200',
+  pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-200',
+  'needs-changes': 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-200',
+  rejected: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-200',
+  'checked-in': 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200',
+  'checked-out': 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
+  'no-show': 'bg-red-900/15 text-red-900 dark:bg-red-900/40 dark:text-red-200'
 };
 
 const FrontDeskDashboard = () => {
   const { logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
   const [visitors, setVisitors] = useState([]);
   const [manualRef, setManualRef] = useState('');
   const [selected, setSelected] = useState(null);
@@ -141,7 +144,15 @@ const FrontDeskDashboard = () => {
           </button>
         </div>
 
-        <div className="px-3 py-4 border-t border-white/10">
+        <div className="px-3 py-4 border-t border-white/10 space-y-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} w-full px-3 py-2.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium`}
+          >
+            {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            {!collapsed && <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>}
+          </button>
           <button
             onClick={logout}
             className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} w-full px-3 py-2.5 rounded-lg text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-all text-sm font-medium`}
@@ -152,13 +163,13 @@ const FrontDeskDashboard = () => {
         </div>
       </aside>
 
-      <main className={`min-h-screen bg-gray-50 p-8 w-full overflow-y-auto transition-all duration-300 ease-in-out ${collapsed ? 'ml-16' : 'ml-64'}`} id="frontdesk-dashboard">
+      <main className={`min-h-screen bg-gray-50 dark:bg-slate-950 p-8 w-full overflow-y-auto transition-all duration-300 ease-in-out ${collapsed ? 'ml-16' : 'ml-64'}`} id="frontdesk-dashboard">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" id="frontdesk-scanner">
-          <section className="rounded-2xl shadow-sm border border-gray-100 bg-white p-6 space-y-4">
-          <h3 className="font-semibold">QR Scanner</h3>
-          <div id="qr-reader" className="rounded-lg overflow-hidden border border-slate-200" />
+          <section className="rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 space-y-4">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100">QR Scanner</h3>
+          <div id="qr-reader" className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700" />
           <div className="space-y-2">
-            <p className="text-sm text-slate-500">Manual fallback</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Manual fallback</p>
             <div className="flex gap-2">
               <input className="input" placeholder="Reference ID" value={manualRef} onChange={(e) => setManualRef(e.target.value)} />
               <RippleButton className="" onClick={manualLookup} variant="default">Find</RippleButton>
@@ -166,12 +177,12 @@ const FrontDeskDashboard = () => {
           </div>
         </section>
 
-          <section className="rounded-2xl shadow-sm border border-gray-100 bg-white p-6 space-y-3">
-          <h3 className="font-semibold">Action Panel</h3>
+          <section className="rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 space-y-3">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100">Action Panel</h3>
           {selected ? (
             <>
-              <p className="text-sm">{selected.visitorName} · {selected.referenceId}</p>
-              <p className="text-xs text-slate-500">Status: {selected.status}</p>
+              <p className="text-sm text-slate-800 dark:text-slate-200">{selected.visitorName} · {selected.referenceId}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Status: {selected.status}</p>
               {selected.status === 'approved' ? (
                 <>
                   <input className="input" placeholder="Remarks (optional)" value={remark} onChange={(e) => setRemark(e.target.value)} />
@@ -182,19 +193,19 @@ const FrontDeskDashboard = () => {
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-slate-500">Only approved visitors can be checked in.</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Only approved visitors can be checked in.</p>
               )}
             </>
           ) : (
-            <p className="text-sm text-slate-500">Scan QR or enter reference ID.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Scan QR or enter reference ID.</p>
           )}
         </section>
         </div>
 
-        <section id="frontdesk-visitors" className="rounded-2xl shadow-sm border border-gray-100 bg-white p-6 overflow-x-auto mt-6">
-          <h3 className="font-semibold mb-4">Today’s Visitors</h3>
+        <section id="frontdesk-visitors" className="rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 overflow-x-auto mt-6">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-4">Today’s Visitors</h3>
           <table className="w-full text-sm">
-            <thead className="text-left text-slate-500">
+            <thead className="text-left text-slate-500 dark:text-slate-400">
               <tr>
                 <th className="pb-2">Reference</th>
                 <th className="pb-2">Visitor</th>
@@ -206,7 +217,7 @@ const FrontDeskDashboard = () => {
             </thead>
             <tbody>
               {visitors.map((visitor) => (
-                <tr key={visitor._id} className="border-t border-slate-100">
+                <tr key={visitor._id} className="border-t border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200">
                   <td className="py-2">{visitor.referenceId}</td>
                   <td className="py-2">{visitor.visitorName}</td>
                   <td className="py-2">{visitor.officeLocation}</td>
@@ -220,7 +231,7 @@ const FrontDeskDashboard = () => {
                     {visitor.status === 'approved' ? (
                       <RippleButton className="" onClick={() => checkInFromRow(visitor._id)} variant="default">Check-In</RippleButton>
                     ) : (
-                      <span className="text-xs text-slate-400">—</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
                     )}
                   </td>
                 </tr>

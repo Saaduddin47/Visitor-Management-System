@@ -30,9 +30,9 @@ const baseStyles =
 
 const variantStyles: Record<RippleButtonVariant, string> = {
   default: 'bg-accent text-white shadow-soft hover:opacity-95',
-  hover: 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50',
-  ghost: 'bg-transparent text-slate-700 hover:bg-slate-100 border border-transparent',
-  hoverborder: 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
+  hover: 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800',
+  ghost: 'bg-transparent text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent',
+  hoverborder: 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
 };
 
 export const RippleButton = forwardRef<HTMLButtonElement, RippleButtonProps>(

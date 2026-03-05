@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { RippleButton } from '@/components/ui/multi-type-ripple-buttons';
+import { useTheme } from '@/context/ThemeContext';
 
 const AnimatedSignIn = ({
   email,
@@ -13,7 +15,8 @@ const AnimatedSignIn = ({
   isLoading,
   isSsoLoading
 }) => {
-  const [theme, setTheme] = useState('light');
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
@@ -29,28 +32,24 @@ const AnimatedSignIn = ({
   return (
     <div
       className={`min-h-screen w-full transition-colors duration-300 ${
-        theme === 'dark' ? 'bg-slate-950' : 'bg-[#e8f4ef]'
+        isDark ? 'bg-slate-950' : 'bg-[#e8f4ef]'
       }`}
     >
       <div className="flex min-h-screen items-center justify-center p-4 md:p-6">
         <div
           className={`relative w-full max-w-6xl overflow-hidden rounded-2xl transition-all duration-500 ${
-            theme === 'dark' ? 'bg-slate-900 shadow-xl shadow-slate-900/40' : 'bg-white shadow-xl shadow-gray-200'
+            isDark ? 'bg-slate-900 shadow-xl shadow-slate-900/40' : 'bg-white shadow-xl shadow-gray-200'
           } ${formVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
         >
           <RippleButton
-            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            onClick={toggleTheme}
             className={`absolute right-4 top-4 z-10 rounded-full p-2 transition-colors ${
-              theme === 'dark' ? 'bg-slate-700 text-yellow-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              isDark ? 'bg-slate-700 text-yellow-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
             aria-label="Toggle theme"
             variant="ghost"
           >
-            {theme === 'dark' ? (
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
-            )}
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </RippleButton>
 
           <div className="flex flex-col md:flex-row">
@@ -61,7 +60,7 @@ const AnimatedSignIn = ({
                 </div>
                 <div
                   className={`rounded-xl flex flex-col justify-center items-center p-6 text-white ${
-                    theme === 'dark' ? 'bg-orange-600' : 'bg-orange-500'
+                    isDark ? 'bg-orange-600' : 'bg-orange-500'
                   }`}
                 >
                   <h2 className="text-5xl font-bold mb-2">24/7</h2>
@@ -75,7 +74,7 @@ const AnimatedSignIn = ({
                 </div>
                 <div
                   className={`rounded-xl flex flex-col justify-center items-center p-6 text-white ${
-                    theme === 'dark' ? 'bg-green-600' : 'bg-green-500'
+                    isDark ? 'bg-green-600' : 'bg-green-500'
                   }`}
                 >
                   <h2 className="text-5xl font-bold mb-2">Role</h2>
@@ -89,7 +88,7 @@ const AnimatedSignIn = ({
 
             <div
               className={`w-full md:w-2/5 p-8 md:p-12 ${
-                theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-gray-900'
+                isDark ? 'bg-slate-900 text-white' : 'bg-white text-gray-900'
               }`}
               style={{
                 transform: formVisible ? 'translateX(0)' : 'translateX(20px)',
@@ -98,17 +97,17 @@ const AnimatedSignIn = ({
               }}
             >
               <div className="mb-8">
-                <h1 className={`text-2xl font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                <h1 className={`text-2xl font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   Sign in to <span className="text-blue-500">VMS</span>
                 </h1>
-                <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                   Access visitor requests, approvals, and front desk operations securely.
                 </p>
               </div>
 
               <form onSubmit={onSubmit} className="space-y-5">
                 <div className="space-y-1">
-                  <label htmlFor="email" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                  <label htmlFor="email" className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                     Work Email
                   </label>
                   <input
@@ -118,7 +117,7 @@ const AnimatedSignIn = ({
                     value={email}
                     onChange={(e) => onEmailChange(e.target.value)}
                     className={`block w-full rounded-md border py-3 px-4 focus:outline-none focus:ring-2 sm:text-sm ${
-                      theme === 'dark'
+                      isDark
                         ? 'bg-slate-800 border-slate-700 text-white placeholder:text-gray-400 focus:ring-blue-500'
                         : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:ring-blue-500'
                     }`}
@@ -128,7 +127,7 @@ const AnimatedSignIn = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label htmlFor="password" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                  <label htmlFor="password" className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                     Password
                   </label>
                   <div className="relative">
@@ -139,7 +138,7 @@ const AnimatedSignIn = ({
                       value={password}
                       onChange={(e) => onPasswordChange(e.target.value)}
                       className={`block w-full rounded-md border py-3 px-4 pr-10 focus:outline-none focus:ring-2 sm:text-sm ${
-                        theme === 'dark'
+                        isDark
                           ? 'bg-slate-800 border-slate-700 text-white placeholder:text-gray-400 focus:ring-blue-500'
                           : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:ring-blue-500'
                       }`}
@@ -149,7 +148,7 @@ const AnimatedSignIn = ({
                     <RippleButton
                       type="button"
                       className={`absolute inset-y-0 right-0 flex items-center pr-3 ${
-                        theme === 'dark' ? 'text-gray-300' : 'text-gray-500'
+                        isDark ? 'text-gray-300' : 'text-gray-500'
                       }`}
                       onClick={() => setShowPassword((prev) => !prev)}
                       aria-label="Toggle password visibility"
@@ -164,7 +163,7 @@ const AnimatedSignIn = ({
                   type="submit"
                   disabled={isLoading}
                   className={`flex w-full items-center justify-center gap-2 rounded-md py-3 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-300 ${
-                    theme === 'dark' ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'
+                    isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'
                   } ${isLoading ? 'cursor-not-allowed opacity-70' : ''}`}
                   variant="default"
                 >
@@ -176,7 +175,7 @@ const AnimatedSignIn = ({
                   onClick={onSso}
                   disabled={isSsoLoading || !email}
                   className={`flex w-full items-center justify-center gap-2 rounded-md py-3 px-4 text-sm font-medium transition-colors ${
-                    theme === 'dark'
+                    isDark
                       ? 'border border-slate-700 bg-slate-800 text-white hover:bg-slate-700'
                       : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                   } ${(isSsoLoading || !email) ? 'cursor-not-allowed opacity-70' : ''}`}
@@ -189,7 +188,7 @@ const AnimatedSignIn = ({
                 </RippleButton>
 
                 {message && (
-                  <p className={`text-sm ${theme === 'dark' ? 'text-rose-300' : 'text-rose-600'}`}>{message}</p>
+                  <p className={`text-sm ${isDark ? 'text-rose-300' : 'text-rose-600'}`}>{message}</p>
                 )}
               </form>
             </div>

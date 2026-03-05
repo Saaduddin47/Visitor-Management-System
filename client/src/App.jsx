@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import EmployeeDashboard from './pages/EmployeeDashboard';
@@ -66,9 +67,11 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <AuthProvider>
-    <AppRoutes />
-  </AuthProvider>
+  <ThemeProvider>
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  </ThemeProvider>
 );
 
 export default App;

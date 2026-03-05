@@ -11,12 +11,14 @@ import {
   LogIn,
   LogOut,
   Menu,
+  Moon,
   MessageSquare,
   ScrollText,
   Settings,
   SlidersHorizontal,
   UserPlus,
   Users,
+  Sun,
   XCircle
 } from 'lucide-react';
 import { adminApi } from '../api';
@@ -26,21 +28,22 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { useTheme } from '../context/ThemeContext';
 
 const emptyUser = { name: '', email: '', password: '', role: 'employee', manager: '', ssoEnabled: false };
 
 const roleBadgeStyles = {
-  employee: 'bg-blue-100 text-blue-700',
-  manager: 'bg-purple-100 text-purple-700',
-  'front-desk': 'bg-teal-100 text-teal-700',
-  'it-admin': 'bg-red-100 text-red-700'
+  employee: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200',
+  manager: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-200',
+  'front-desk': 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-200',
+  'it-admin': 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-200'
 };
 
 const avatarRoleStyles = {
-  employee: 'bg-blue-100 text-blue-700',
-  manager: 'bg-purple-100 text-purple-700',
-  'front-desk': 'bg-teal-100 text-teal-700',
-  'it-admin': 'bg-red-100 text-red-700'
+  employee: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200',
+  manager: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-200',
+  'front-desk': 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-200',
+  'it-admin': 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-200'
 };
 
 const actionVisuals = {
@@ -65,6 +68,8 @@ const getLogVisual = (action = '') => actionVisuals[action] || { icon: Activity,
 
 const AdminDashboard = () => {
   const { logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   const [users, setUsers] = useState([]);
   const [logs, setLogs] = useState([]);
@@ -193,7 +198,15 @@ const AdminDashboard = () => {
         </div>
       </ScrollArea>
 
-      <div className="px-3 py-4 border-t border-white/10">
+      <div className="px-3 py-4 border-t border-white/10 space-y-2">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium"
+        >
+          {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+        </button>
         <button
           onClick={logout}
           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-all text-sm font-medium"
@@ -206,29 +219,29 @@ const AdminDashboard = () => {
   );
 
   const UsersSection = () => (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 space-y-6">
       <div className="flex items-center gap-2">
         <UserPlus size={18} className="text-[#2E75B6]" />
-        <h2 className="text-lg font-semibold text-slate-900">Create New User</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Create New User</h2>
       </div>
 
       <form className="space-y-4" onSubmit={createUser}>
         <div>
-          <label className="block text-sm text-slate-700 mb-1">Name</label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">Name</label>
           <input className="input" placeholder="Enter full name" value={userForm.name} onChange={(event) => setUserForm((prev) => ({ ...prev, name: event.target.value }))} required />
         </div>
         <div>
-          <label className="block text-sm text-slate-700 mb-1">Email</label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">Email</label>
           <input className="input" placeholder="Enter email" value={userForm.email} onChange={(event) => setUserForm((prev) => ({ ...prev, email: event.target.value }))} required />
         </div>
         <div>
-          <label className="block text-sm text-slate-700 mb-1">Password</label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">Password</label>
           <input className="input" type="password" placeholder="Create password" value={userForm.password} onChange={(event) => setUserForm((prev) => ({ ...prev, password: event.target.value }))} required />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
           <div>
-            <label className="block text-sm text-slate-700 mb-1">Role</label>
+            <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">Role</label>
             <select className="input" value={userForm.role} onChange={(event) => setUserForm((prev) => ({ ...prev, role: event.target.value }))}>
               <option value="employee">Employee</option>
               <option value="manager">Manager</option>
@@ -236,7 +249,7 @@ const AdminDashboard = () => {
               <option value="it-admin">IT Admin</option>
             </select>
           </div>
-          <label className="text-sm flex items-center gap-2 mt-6">
+          <label className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2 mt-6">
             <input type="checkbox" checked={userForm.ssoEnabled} onChange={(event) => setUserForm((prev) => ({ ...prev, ssoEnabled: event.target.checked }))} />
             SSO Enabled
           </label>
@@ -245,9 +258,9 @@ const AdminDashboard = () => {
         <RippleButton className="w-full" type="submit" variant="default">Create</RippleButton>
       </form>
 
-      <div className="border-t border-gray-100 pt-4 space-y-3">
-        <h3 className="font-semibold text-slate-900">Users</h3>
-        <div className="divide-y divide-gray-100">
+      <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-3">
+        <h3 className="font-semibold text-slate-900 dark:text-slate-100">Users</h3>
+        <div className="divide-y divide-gray-100 dark:divide-slate-800">
           {users.map((user) => (
             <div key={user._id} className="py-4 first:pt-0 last:pb-0">
               <div className="grid grid-cols-1 2xl:grid-cols-[1.2fr_1.2fr_auto] gap-4 items-center">
@@ -256,8 +269,8 @@ const AdminDashboard = () => {
                     {getInitials(user.name)}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-900">{user.name}</p>
-                    <p className="text-xs text-slate-500">{user.email}</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{user.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
                     <span className={`inline-flex mt-1 px-2 py-0.5 rounded-full text-xs font-semibold ${roleBadgeStyles[user.role] || 'bg-slate-100 text-slate-700'}`}>
                       {user.role}
                     </span>
@@ -278,7 +291,7 @@ const AdminDashboard = () => {
                     <option value="front-desk">Front-Desk</option>
                     <option value="it-admin">IT Admin</option>
                   </select>
-                  <label className="text-sm flex items-center gap-2 px-2">
+                  <label className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2 px-2">
                     <input
                       type="checkbox"
                       checked={editing[user._id]?.isActive ?? user.isActive}
@@ -289,7 +302,7 @@ const AdminDashboard = () => {
                     />
                     Active
                   </label>
-                  <label className="text-sm flex items-center gap-2 px-2">
+                  <label className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2 px-2">
                     <input
                       type="checkbox"
                       checked={editing[user._id]?.ssoEnabled ?? user.ssoEnabled}
@@ -315,11 +328,11 @@ const AdminDashboard = () => {
   );
 
   const LogsSection = () => (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <ScrollText size={18} className="text-[#2E75B6]" />
-          <h2 className="text-lg font-semibold text-slate-900">Audit Logs</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Audit Logs</h2>
           <span className="bg-blue-100 text-blue-700 rounded-full px-2 py-0.5 text-xs font-semibold">{totalLogs}</span>
         </div>
 
@@ -337,40 +350,40 @@ const AdminDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm text-slate-700 mb-1">Action</label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">Action</label>
           <input className="input" placeholder="e.g. request.created" value={filters.action} onChange={(event) => setFilters((prev) => ({ ...prev, action: event.target.value }))} />
         </div>
         <div>
-          <label className="block text-sm text-slate-700 mb-1">Role</label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">Role</label>
           <input className="input" placeholder="e.g. manager" value={filters.role} onChange={(event) => setFilters((prev) => ({ ...prev, role: event.target.value }))} />
         </div>
       </div>
 
       <div className="flex items-end flex-wrap gap-2">
         <div>
-          <label className="block text-sm text-slate-700 mb-1">From Date</label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">From Date</label>
           <div className="relative">
-            <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="date"
               value={filters.from}
               onChange={(event) => setFilters((prev) => ({ ...prev, from: event.target.value }))}
-              className="border border-gray-200 rounded-lg px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
 
-        <div className="pb-2 text-slate-400">—</div>
+        <div className="pb-2 text-slate-400 dark:text-slate-500">—</div>
 
         <div>
-          <label className="block text-sm text-slate-700 mb-1">To Date</label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">To Date</label>
           <div className="relative">
-            <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="date"
               value={filters.to}
               onChange={(event) => setFilters((prev) => ({ ...prev, to: event.target.value }))}
-              className="border border-gray-200 rounded-lg px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -392,14 +405,14 @@ const AdminDashboard = () => {
           const visual = getLogVisual(log.action);
           const Icon = visual.icon;
           return (
-            <div key={log._id} className="border border-gray-100 rounded-xl p-3 bg-white">
+            <div key={log._id} className="border border-gray-100 dark:border-slate-800 rounded-xl p-3 bg-white dark:bg-slate-900">
               <div className="flex items-center gap-3">
                 <Icon size={18} className={visual.color} />
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 truncate">{log.action}</p>
-                  <p className="text-xs text-slate-500 truncate">{log.user?.name || 'System'}</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{log.action}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{log.user?.name || 'System'}</p>
                 </div>
-                <p className="ml-auto text-xs text-slate-400 whitespace-nowrap">{new Date(log.createdAt).toLocaleString()}</p>
+                <p className="ml-auto text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">{new Date(log.createdAt).toLocaleString()}</p>
                 <span className={`text-xs px-2 py-1 rounded-full capitalize font-semibold ${roleBadgeStyles[log.role] || 'bg-slate-100 text-slate-700'}`}>
                   {log.role || 'unknown'}
                 </span>
@@ -419,7 +432,7 @@ const AdminDashboard = () => {
         >
           Previous
         </RippleButton>
-        <p className="text-sm text-slate-600">Page {page} of {totalPages}</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">Page {page} of {totalPages}</p>
         <RippleButton
           onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
           disabled={page === totalPages}
@@ -434,22 +447,22 @@ const AdminDashboard = () => {
   );
 
   const SettingsSection = () => (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
       <div className="flex items-center gap-2 mb-4">
         <Settings size={18} className="text-[#2E75B6]" />
-        <h2 className="text-lg font-semibold text-slate-900">System Settings</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">System Settings</h2>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_260px_200px_auto] gap-3 items-end">
         <div>
-          <label className="block text-sm text-slate-700 mb-1">Company Name</label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">Company Name</label>
           <input className="input" value={settings.companyName} onChange={(event) => setSettings((prev) => ({ ...prev, companyName: event.target.value }))} />
         </div>
         <div>
-          <label className="block text-sm text-slate-700 mb-1">Check-in Window (minutes)</label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">Check-in Window (minutes)</label>
           <input className="input" type="number" value={settings.checkInWindowMinutes} onChange={(event) => setSettings((prev) => ({ ...prev, checkInWindowMinutes: event.target.value }))} />
         </div>
-        <label className="text-sm flex items-center gap-2 pb-2">
+        <label className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2 pb-2">
           <input type="checkbox" checked={settings.allowEmployeeSso} onChange={(event) => setSettings((prev) => ({ ...prev, allowEmployeeSso: event.target.checked }))} />
           Allow Employee SSO
         </label>
@@ -459,11 +472,11 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
       <div className="lg:hidden fixed top-4 left-4 z-40">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="bg-white">
+            <Button variant="outline" size="icon" className="bg-white dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200">
               <Menu size={18} />
             </Button>
           </SheetTrigger>
@@ -482,7 +495,7 @@ const AdminDashboard = () => {
           <ResizableHandle withHandle />
 
           <ResizablePanel defaultSize={80}>
-            <div className="h-screen overflow-y-auto bg-gray-50 p-8">
+            <div className="h-screen overflow-y-auto bg-gray-50 dark:bg-slate-950 p-8">
               {activeSection === 'users' && <UsersSection />}
               {activeSection === 'logs' && <LogsSection />}
               {activeSection === 'settings' && <SettingsSection />}
@@ -491,7 +504,7 @@ const AdminDashboard = () => {
         </ResizablePanelGroup>
       </div>
 
-      <div className="lg:hidden min-h-screen bg-gray-50 pt-20 p-4">
+      <div className="lg:hidden min-h-screen bg-gray-50 dark:bg-slate-950 pt-20 p-4">
         {activeSection === 'users' && <UsersSection />}
         {activeSection === 'logs' && <LogsSection />}
         {activeSection === 'settings' && <SettingsSection />}

@@ -31,7 +31,7 @@ const SheetContent = React.forwardRef<
     <SheetPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed z-50 bg-white p-0 shadow-lg transition ease-in-out',
+        'fixed z-50 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-0 shadow-lg transition ease-in-out',
         side === 'left' && 'inset-y-0 left-0 h-full w-80',
         side === 'right' && 'inset-y-0 right-0 h-full w-80',
         side === 'top' && 'inset-x-0 top-0 h-auto border-b',
