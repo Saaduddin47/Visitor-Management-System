@@ -29,8 +29,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '../context/ThemeContext';
+import AnimatedDropdown from '@/components/ui/AnimatedDropdown';
 
 const emptyUser = { name: '', email: '', password: '', role: 'employee', manager: '', ssoEnabled: false };
+const roleOptions = [
+  { id: 'employee', label: 'Employee', description: 'Can create visitor requests' },
+  { id: 'manager', label: 'Manager', description: 'Can approve or reject requests' },
+  { id: 'front-desk', label: 'Front-Desk', description: 'Can scan and manage check-ins' },
+  { id: 'it-admin', label: 'IT Admin', description: 'Can manage users and settings' }
+];
 
 const roleBadgeStyles = {
   employee: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200',
@@ -242,12 +249,12 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
           <div>
             <label className="block text-sm text-slate-700 dark:text-slate-300 mb-1">Role</label>
-            <select className="input" value={userForm.role} onChange={(event) => setUserForm((prev) => ({ ...prev, role: event.target.value }))}>
-              <option value="employee">Employee</option>
-              <option value="manager">Manager</option>
-              <option value="front-desk">Front-Desk</option>
-              <option value="it-admin">IT Admin</option>
-            </select>
+            <AnimatedDropdown
+              options={roleOptions}
+              value={userForm.role}
+              onChange={(event) => setUserForm((prev) => ({ ...prev, role: event.target.value }))}
+              placeholder="Select role"
+            />
           </div>
           <label className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2 mt-6">
             <input type="checkbox" checked={userForm.ssoEnabled} onChange={(event) => setUserForm((prev) => ({ ...prev, ssoEnabled: event.target.checked }))} />
@@ -278,19 +285,15 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  <select
-                    className="input"
+                  <AnimatedDropdown
+                    options={roleOptions}
                     value={editing[user._id]?.role ?? user.role}
                     onChange={(event) => setEditing((prev) => ({
                       ...prev,
                       [user._id]: { ...prev[user._id], role: event.target.value }
                     }))}
-                  >
-                    <option value="employee">Employee</option>
-                    <option value="manager">Manager</option>
-                    <option value="front-desk">Front-Desk</option>
-                    <option value="it-admin">IT Admin</option>
-                  </select>
+                    placeholder="Select role"
+                  />
                   <label className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2 px-2">
                     <input
                       type="checkbox"
