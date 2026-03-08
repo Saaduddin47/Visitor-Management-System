@@ -225,6 +225,7 @@ const ManagerDashboard = () => {
                   <p className="font-medium text-slate-900 dark:text-slate-100">{request.visitorName} · {request.referenceId}</p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">{request.dateOfVisit} {request.timeOfVisit} · {request.officeLocation}</p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">Employee: {request.employee?.name}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Purpose: {request.purpose || request.visitPurpose || request.purposeOfVisit || '-'}</p>
                 </div>
                 <span className={`text-xs px-2 py-1 rounded-full capitalize h-fit font-semibold ${statusBadgeStyles[request.status] || 'bg-slate-100 text-slate-700'}`}>
                   {request.status}
