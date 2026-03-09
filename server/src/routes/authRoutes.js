@@ -1,4 +1,5 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { ROLES, AUDIT_ACTIONS } from '@vms/shared/src/index.js';
 import { User } from '../models/User.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -6,6 +7,7 @@ import { AppError } from '../utils/AppError.js';
 import { requiredEmail, requiredString } from '../utils/validators.js';
 import { clearAuthCookie, protect, setAuthCookie, signToken } from '../middleware/auth.js';
 import { writeAuditLog } from '../services/auditService.js';
+import { env } from '../config/env.js';
 
 const router = express.Router();
 
@@ -109,18 +111,29 @@ router.post(
 
 router.post(
   '/logout',
-  protect,
   asyncHandler(async (req, res) => {
+    const token = req.cookies?.token;
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, env.jwtSecret);
+        const user = await User.findById(decoded.sub).select('_id role');
+
+        if (user) {
+          await writeAuditLog({
+            action: AUDIT_ACTIONS.USER_LOGOUT,
+            user: user._id,
+            role: user.role,
+            resourceType: 'User',
+            resourceId: user._id.toString()
+          });
+        }
+      } catch {
+        // ignore invalid/expired token and continue logout
+      }
+    }
+
     clearAuthCookie(res);
-
-    await writeAuditLog({
-      action: AUDIT_ACTIONS.USER_LOGOUT,
-      user: req.user._id,
-      role: req.user.role,
-      resourceType: 'User',
-      resourceId: req.user._id.toString()
-    });
-
     res.json({ message: 'Logged out successfully' });
   })
 );

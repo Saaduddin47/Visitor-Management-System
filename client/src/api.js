@@ -14,7 +14,7 @@ export const authApi = {
   login: (data) => api.post('/auth/login', data),
   ssoEmployee: (data) => api.post('/auth/sso/employee', data),
   me: () => api.get('/auth/me'),
-  logout: () => api.post('/auth/logout')
+  logout: () => api.post('/auth/logout', {}, { withCredentials: true })
 };
 
 export const employeeApi = {
