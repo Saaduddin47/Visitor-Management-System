@@ -22,9 +22,10 @@ const app = express();
 
 const allowedOrigins = [
   env.clientUrl,
+  "https://visitor-management-system-client.vercel.app",
   'http://localhost:5173',
   'http://localhost:3000',
-].filter(Boolean);
+];
 
 app.use(
   cors({
