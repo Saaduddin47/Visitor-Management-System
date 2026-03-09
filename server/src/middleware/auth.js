@@ -4,28 +4,42 @@ import { User } from '../models/User.js';
 
 export const signToken = (payload) => jwt.sign(payload, env.jwtSecret, { expiresIn: env.jwtExpiresIn });
 
+const shouldUseCrossSiteCookie = () => {
+  const clientUrl = (env.clientUrl || '').toLowerCase();
+  const isHttpsClient = clientUrl.startsWith('https://');
+  const isLocalClient = clientUrl.includes('localhost') || clientUrl.includes('127.0.0.1');
+  return isHttpsClient && !isLocalClient;
+};
+
 export const setAuthCookie = (res, token) => {
-  const isProduction = env.nodeEnv === 'production';
+  const crossSite = shouldUseCrossSiteCookie();
+  const secure = crossSite || env.nodeEnv === 'production';
   res.cookie('token', token, {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
+    secure,
+    sameSite: crossSite ? 'none' : 'lax',
     maxAge: 24 * 60 * 60 * 1000
   });
 };
 
 export const clearAuthCookie = (res) => {
-  const isProduction = env.nodeEnv === 'production';
+  const crossSite = shouldUseCrossSiteCookie();
+  const secure = crossSite || env.nodeEnv === 'production';
   res.clearCookie('token', {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax'
+    secure,
+    sameSite: crossSite ? 'none' : 'lax'
   });
 };
 
 export const protect = async (req, res, next) => {
   try {
-    const token = req.cookies?.token;
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    const bearerToken = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7).trim()
+      : null;
+
+    const token = req.cookies?.token || bearerToken;
     if (!token) return res.status(401).json({ message: 'Unauthorized' });
 
     const decoded = jwt.verify(token, env.jwtSecret);

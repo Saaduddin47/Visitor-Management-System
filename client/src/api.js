@@ -18,9 +18,15 @@ export const authApi = {
 };
 
 export const employeeApi = {
-  createRequest: (formData) => api.post('/employee/requests', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  createRequest: (formData) => api.post('/employee/requests', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    withCredentials: true
+  }),
   getRequests: () => api.get('/employee/requests'),
-  updateRequest: (id, formData) => api.patch(`/employee/requests/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+  updateRequest: (id, formData) => api.patch(`/employee/requests/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    withCredentials: true
+  })
 };
 
 export const managerApi = {
