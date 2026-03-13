@@ -90,13 +90,15 @@ const ManagerDashboard = () => {
         return copy;
       });
     } catch (error) {
-      setRequests((previous) => previous.map((request) => (request._id === id ? previousRequest : request)));
+      await load();
       setJustActedById((previous) => {
         const copy = { ...previous };
         delete copy[id];
         return copy;
       });
-      setToast(error.response?.data?.message || 'Action failed. Please try again.');
+      const errorText = error?.response?.data?.message || error?.message || '';
+      const smtpFailed = /enotfound|smtp/i.test(String(errorText));
+      setToast(smtpFailed ? 'Action completed, but notification email failed.' : (error.response?.data?.message || 'Action failed. Please try again.'));
       window.setTimeout(() => setToast(''), 3000);
     } finally {
       setLoadingById((previous) => {

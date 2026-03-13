@@ -26,7 +26,9 @@ const FrontDeskDashboard = () => {
 
   const load = async () => {
     const { data } = await frontDeskApi.today();
-    setVisitors(Array.isArray(data.visitors) ? data.visitors : []);
+    const nextVisitors = Array.isArray(data.visitors) ? data.visitors : [];
+    setVisitors(nextVisitors);
+    return nextVisitors;
   };
 
   useEffect(() => {
@@ -65,16 +67,33 @@ const FrontDeskDashboard = () => {
 
   const mark = async (type) => {
     if (!selected) return;
-    if (type === 'in') await frontDeskApi.checkIn(selected._id, { remark });
-    if (type === 'out') await frontDeskApi.checkOut(selected._id, { remark });
-    if (type === 'no-show') await frontDeskApi.noShow(selected._id, { remark });
-    setRemark('');
-    await load();
+    const selectedId = selected._id;
+    try {
+      if (type === 'in') await frontDeskApi.checkIn(selected._id, { remark });
+      if (type === 'out') await frontDeskApi.checkOut(selected._id, { remark });
+      if (type === 'no-show') await frontDeskApi.noShow(selected._id, { remark });
+    } catch (error) {
+      const errorText = error?.response?.data?.message || error?.message || '';
+      const smtpFailed = /enotfound|smtp/i.test(String(errorText));
+      if (!smtpFailed) throw error;
+    } finally {
+      setRemark('');
+      const refreshedVisitors = await load();
+      const refreshedSelected = refreshedVisitors.find((visitor) => visitor._id === selectedId);
+      setSelected(refreshedSelected || null);
+    }
   };
 
   const checkInFromRow = async (visitorId) => {
-    await frontDeskApi.checkIn(visitorId, { remark: '' });
-    await load();
+    try {
+      await frontDeskApi.checkIn(visitorId, { remark: '' });
+    } catch (error) {
+      const errorText = error?.response?.data?.message || error?.message || '';
+      const smtpFailed = /enotfound|smtp/i.test(String(errorText));
+      if (!smtpFailed) throw error;
+    } finally {
+      await load();
+    }
   };
 
   const filteredVisitors = visitors.filter((visitor) => {

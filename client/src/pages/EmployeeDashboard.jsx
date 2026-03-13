@@ -87,7 +87,10 @@ const EmployeeDashboard = () => {
       setMessage('Request submitted successfully');
       await loadRequests();
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Failed to submit');
+      await loadRequests();
+      const errorText = error?.response?.data?.message || error?.message || '';
+      const smtpFailed = /enotfound|smtp/i.test(String(errorText));
+      setMessage(smtpFailed ? 'Request saved, but notification email failed.' : (error.response?.data?.message || 'Failed to submit'));
     } finally {
       setIsSubmitting(false);
     }
@@ -120,7 +123,10 @@ const EmployeeDashboard = () => {
       setEditForm(initialForm);
       await loadRequests();
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Failed to resubmit');
+      await loadRequests();
+      const errorText = error?.response?.data?.message || error?.message || '';
+      const smtpFailed = /enotfound|smtp/i.test(String(errorText));
+      setMessage(smtpFailed ? 'Request updated, but notification email failed.' : (error.response?.data?.message || 'Failed to resubmit'));
     }
   };
 

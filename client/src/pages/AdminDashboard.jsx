@@ -37,6 +37,7 @@ const AdminDashboard = () => {
   const [settings, setSettings] = useState({ companyName: '', allowEmployeeSso: true, checkInWindowMinutes: 120 });
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState('overview');
+  const [actionMessage, setActionMessage] = useState('');
 
   const updateCreateUserField = (key, value) => setUserForm((previous) => ({ ...previous, [key]: value }));
 
@@ -69,19 +70,41 @@ const AdminDashboard = () => {
 
   const createUser = async (event) => {
     event.preventDefault();
-    await adminApi.createUser(userForm);
-    setUserForm(emptyUser);
-    await loadUsers();
+    try {
+      await adminApi.createUser(userForm);
+      setUserForm(emptyUser);
+      setActionMessage('User created successfully.');
+      await Promise.all([loadUsers(), loadLogs()]);
+    } catch (error) {
+      await Promise.all([loadUsers(), loadLogs()]);
+      const errorText = error?.response?.data?.message || error?.message || '';
+      const smtpFailed = /enotfound|smtp/i.test(String(errorText));
+      setActionMessage(smtpFailed ? 'User created, but notification email failed.' : (error.response?.data?.message || 'Failed to create user.'));
+    }
   };
 
   const deleteUser = async (id) => {
-    await adminApi.deleteUser(id);
-    await loadUsers();
+    try {
+      await adminApi.deleteUser(id);
+      setActionMessage('User deleted successfully.');
+      await Promise.all([loadUsers(), loadLogs()]);
+    } catch (error) {
+      await Promise.all([loadUsers(), loadLogs()]);
+      setActionMessage(error.response?.data?.message || 'Failed to delete user.');
+    }
   };
 
   const updateUser = async (id) => {
-    await adminApi.updateUser(id, editing[id]);
-    await loadUsers();
+    try {
+      await adminApi.updateUser(id, editing[id]);
+      setActionMessage('User updated successfully.');
+      await Promise.all([loadUsers(), loadLogs()]);
+    } catch (error) {
+      await Promise.all([loadUsers(), loadLogs()]);
+      const errorText = error?.response?.data?.message || error?.message || '';
+      const smtpFailed = /enotfound|smtp/i.test(String(errorText));
+      setActionMessage(smtpFailed ? 'User updated, but notification email failed.' : (error.response?.data?.message || 'Failed to update user.'));
+    }
   };
 
   const applyFilters = async () => {
@@ -97,12 +120,18 @@ const AdminDashboard = () => {
   };
 
   const saveSettings = async () => {
-    await adminApi.updateSettings({
-      companyName: settings.companyName,
-      allowEmployeeSso: settings.allowEmployeeSso,
-      checkInWindowMinutes: Number(settings.checkInWindowMinutes)
-    });
-    await loadSettings();
+    try {
+      await adminApi.updateSettings({
+        companyName: settings.companyName,
+        allowEmployeeSso: settings.allowEmployeeSso,
+        checkInWindowMinutes: Number(settings.checkInWindowMinutes)
+      });
+      setActionMessage('Settings saved successfully.');
+      await Promise.all([loadSettings(), loadLogs()]);
+    } catch (error) {
+      await Promise.all([loadSettings(), loadLogs()]);
+      setActionMessage(error.response?.data?.message || 'Failed to save settings.');
+    }
   };
 
   const pageSize = 10;
@@ -113,6 +142,11 @@ const AdminDashboard = () => {
 
   return (
     <BoltLayout title="IT Administrator Dashboard" subtitle="System management and configuration">
+      {actionMessage ? (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 px-3 py-2 text-sm dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+          {actionMessage}
+        </div>
+      ) : null}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard label="Total Users" value={users.length} tone="blue" icon={Users} />
         <StatCard label="Active Users" value={users.filter((user) => user.isActive).length} tone="green" icon={Activity} />
