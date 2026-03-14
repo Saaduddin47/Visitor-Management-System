@@ -1,15 +1,6 @@
 
 
 services:
-  mongodb:
-    image: mongo:7
-    container_name: vms-mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-
   server:
     build:
       context: .
@@ -20,8 +11,8 @@ services:
       - "5000:5000"
     env_file:
       - ./server/.env
-    depends_on:
-      - mongodb
+    environment:
+      - MONGO_URI=mongodb+srv://Azhaan:mk9RVr2U6BogpQFM@vms.959nquq.mongodb.net/?appName=VMS
     volumes:
       - ./server:/app/server
       - ./shared:/app/shared
@@ -42,5 +33,3 @@ services:
       - ./client:/app
       - /app/node_modules
 
-volumes:
-  mongo-data:
