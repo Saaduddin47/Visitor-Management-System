@@ -1,6 +1,5 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import QRCode from 'qrcode';
 import { AUDIT_ACTIONS, REQUEST_STATUS, ROLES } from '@vms/shared/src/index.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -9,6 +8,7 @@ import { VisitorRequest } from '../models/VisitorRequest.js';
 import { writeAuditLog } from '../services/auditService.js';
 import { AppError } from '../utils/AppError.js';
 import { sendMail } from '../config/mailer.js';
+import { ensureRequestQrCode } from '../utils/qr.js';
 
 const router = express.Router();
 
@@ -18,6 +18,21 @@ const ensureValidRequestId = (id, res) => {
     return false;
   }
   return true;
+};
+
+const buildQrInlineAttachment = (qrCodeDataUrl) => {
+  const match = String(qrCodeDataUrl || '').match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/i);
+  if (!match) return null;
+
+  const extension = match[1].toLowerCase() === 'jpeg' ? 'jpg' : match[1].toLowerCase();
+  const base64Content = match[2];
+
+  return {
+    filename: `visitor-qr.${extension}`,
+    content: base64Content,
+    encoding: 'base64',
+    cid: 'visitor-qr'
+  };
 };
 
 router.use(protect, authorize(ROLES.MANAGER));
@@ -47,15 +62,15 @@ router.post(
       request.managerComment = requiredString(req.body.comment || 'Approved', 'Comment', 2000);
       request.actions.push({ action: REQUEST_STATUS.APPROVED, user: req.user._id, remark: request.managerComment });
 
-      request.qrCodeDataUrl = await QRCode.toDataURL(JSON.stringify({
-        visitId: request.visitId,
-        referenceId: request.referenceId
-      }));
+      await ensureRequestQrCode(request);
       request.qrSentAt = new Date();
 
       await request.save();
 
       try {
+        const qrInlineAttachment = buildQrInlineAttachment(request.qrCodeDataUrl);
+        const qrImageSrc = qrInlineAttachment ? 'cid:visitor-qr' : request.qrCodeDataUrl;
+
         await sendMail({
           to: request.visitorEmail,
           subject: `Visit Approved (${request.referenceId})`,
@@ -64,8 +79,9 @@ router.post(
             <p><strong>Reference:</strong> ${request.referenceId}</p>
             <p><strong>Date:</strong> ${request.dateOfVisit} at ${request.timeOfVisit}</p>
             <p>Please show this QR code at front desk:</p>
-            <img src="${request.qrCodeDataUrl}" alt="Visitor QR" style="width:220px;height:220px"/>
-          </div>`
+            <img src="${qrImageSrc}" alt="Visitor QR" style="width:220px;height:220px"/>
+          </div>`,
+          attachments: qrInlineAttachment ? [qrInlineAttachment] : undefined
         });
 
         await writeAuditLog({

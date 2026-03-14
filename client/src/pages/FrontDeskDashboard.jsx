@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Calendar, Clock, QrCode, Search, UserCheck, UserX, FileText } from 'lucide-react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 import { frontDeskApi } from '../api';
 import { RippleButton } from '@/components/ui/multi-type-ripple-buttons';
 import BoltLayout from '@/components/BoltLayout';
@@ -22,7 +22,10 @@ const FrontDeskDashboard = () => {
   const [selected, setSelected] = useState(null);
   const [remark, setRemark] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const scannerMounted = useRef(false);
+  const [isScannerRunning, setIsScannerRunning] = useState(false);
+  const [scannerError, setScannerError] = useState('');
+  const scannerRef = useRef(null);
+  const scanLockRef = useRef(false);
 
   const load = async () => {
     const { data } = await frontDeskApi.today();
@@ -37,28 +40,88 @@ const FrontDeskDashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    if (scannerMounted.current) return;
-    scannerMounted.current = true;
+  const stopScanner = async () => {
+    if (!scannerRef.current || !isScannerRunning) return;
+    try {
+      await scannerRef.current.stop();
+      await scannerRef.current.clear();
+    } catch {
+      // no-op
+    } finally {
+      setIsScannerRunning(false);
+    }
+  };
 
-    const scanner = new Html5QrcodeScanner('qr-reader', { fps: 10, qrbox: 200 }, false);
-    scanner.render(
-      async (decodedText) => {
+  const handleManualStopScan = async () => {
+    await stopScanner();
+    window.location.reload();
+  };
+
+  const onQrDecoded = async (decodedText) => {
+    if (scanLockRef.current) return;
+    scanLockRef.current = true;
+
+    try {
+      setScannerError('');
+      const parsed = JSON.parse(decodedText);
+      if (!parsed?.visitId) throw new Error('Invalid QR payload');
+
+      const { data } = await frontDeskApi.scan({ visitId: parsed.visitId });
+      const scannedRequest = data.request;
+
+      if (scannedRequest?.status === 'approved') {
         try {
-          const parsed = JSON.parse(decodedText);
-          const { data } = await frontDeskApi.scan({ visitId: parsed.visitId });
-          setSelected(data.request);
-        } catch {
-          // ignore malformed scans
+          await frontDeskApi.checkIn(scannedRequest._id, { remark: '' });
+        } catch (error) {
+          const errorText = error?.response?.data?.message || error?.message || '';
+          const smtpFailed = /enotfound|smtp/i.test(String(errorText));
+          if (!smtpFailed) throw error;
         }
-      },
-      () => {}
-    );
+      }
 
+      const refreshedVisitors = await load();
+      const refreshedSelected = refreshedVisitors.find((visitor) => visitor._id === scannedRequest._id);
+      setSelected(refreshedSelected || scannedRequest || null);
+
+      await stopScanner();
+    } catch (error) {
+      setScannerError(error?.response?.data?.message || error?.message || 'Unable to scan this QR code.');
+    } finally {
+      window.setTimeout(() => {
+        scanLockRef.current = false;
+      }, 900);
+    }
+  };
+
+  const startScanner = async () => {
+    if (isScannerRunning) return;
+    setScannerError('');
+
+    try {
+      const scanner = scannerRef.current || new Html5Qrcode('qr-reader');
+      scannerRef.current = scanner;
+
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        onQrDecoded,
+        () => {}
+      );
+
+      setIsScannerRunning(true);
+    } catch (error) {
+      setIsScannerRunning(false);
+      setScannerError(error?.message || 'Unable to start camera scanner.');
+    }
+  };
+
+  useEffect(() => {
     return () => {
-      scanner.clear().catch(() => {});
+      if (scannerRef.current && isScannerRunning) {
+        scannerRef.current.stop().catch(() => {});
+      }
     };
-  }, []);
+  }, [isScannerRunning]);
 
   const manualLookup = async () => {
     const { data } = await frontDeskApi.manual({ referenceId: manualRef });
@@ -121,6 +184,19 @@ const FrontDeskDashboard = () => {
         <SectionCard title="QR Scanner" actions={<QrCode className="w-5 h-5 text-emerald-600" />}>
           <div className="space-y-3">
             <div id="qr-reader" className="rounded-lg overflow-hidden border border-gray-200 dark:border-slate-700" />
+            <div className="flex flex-wrap items-center gap-2">
+              <RippleButton
+                onClick={startScanner}
+                variant="default"
+                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                disabled={isScannerRunning}
+              >
+                Start Scan
+              </RippleButton>
+              <RippleButton onClick={handleManualStopScan} variant="hover" disabled={!isScannerRunning}>Stop Scan</RippleButton>
+              <span className="text-xs text-gray-500 dark:text-slate-400">{isScannerRunning ? 'Camera active' : 'Camera inactive'}</span>
+            </div>
+            {scannerError ? <p className="text-xs text-red-600 dark:text-red-400">{scannerError}</p> : null}
             <div className="space-y-2">
               <p className="text-sm text-gray-500 dark:text-slate-400">Manual fallback</p>
               <div className="flex gap-2">
